@@ -5,7 +5,7 @@ dist/
 sdist/
 eggs/
 *.egg
-*.egg_info/
+*.egg-info/
 .installed.cfg
 
 # Vim
