@@ -1,2 +1,6 @@
+from sys import stdin, stdout
+from pybifrost.server import Server
+
 def main():
-    pass
+    server = Server(infile=stdin, outfile=stdout)
+    server.start()
