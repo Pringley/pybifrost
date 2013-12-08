@@ -2,6 +2,17 @@
 
 A burning rainbow bridge between scripting languages.
 
+## Sample I/O
+
+```javascript
+recv {"module": "numpy"}
+send {"result": {"__oid__": 4336043000}}
+recv {"oid": 4336043000, "method": "array", "params": [[1,2,3]]}
+send {"result": {"__oid__": 140566653384336}}
+recv {"oid": 140566653384336, "attr": "size"}
+send {"result": 3}
+```
+
 ## Copyright
 
 Copyright (c) 2013 Ben Pringle
