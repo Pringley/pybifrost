@@ -1,5 +1,8 @@
 import json
 
+class StopServer(Exception):
+    """Raise to stop the server."""
+
 class Server:
 
     def __init__(self, infile, outfile):
@@ -7,18 +10,31 @@ class Server:
         self.outfile = outfile
 
     def start(self):
-        while True:
-            line = self.infile.readline()
-            if not line:
-                break # stop at EOF
-            try:
-                request = json.loads(line)
-            except ValueError:
-                self.send({"error": "could not parse json"})
-                continue
-            response = {} # dummy response
-            self.send(response)
+        try:
+            while True:
+                request = self.recv()
+                response = self.handle_json(request)
+                self.send(response)
+        except StopServer:
+            pass
 
-    def send(self, message):
-        self.outfile.write(json.dumps(message, self.outfile) + '\n')
+    def recv(self):
+        line = self.infile.readline()
+        if not line:
+            raise StopServer # stop at EOF
+        return line
+
+    def send(self, response):
+        self.outfile.write(response + '\n')
         self.outfile.flush()
+
+    def handle_json(self, json_line):
+        try:
+            request = json.loads(json_line)
+        except ValueError:
+            return json.dumps({"error": "could not parse json"})
+        response = self._handle(request)
+        return json.dumps(response)
+
+    def _handle(self, request):
+        return {}
