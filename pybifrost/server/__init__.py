@@ -63,12 +63,12 @@ class Server:
             else:
                 params = []
             try:
-                method = getattr(obj, request['method'])
+                method_name = request['method']
+                method = getattr(obj, method_name)
             except AttributeError as e:
-                print('attributeerror:', e)
-                return self.makeerror('method does not exist')
+                return self.makeerror('method "{}" does not exist'.format(method_name))
             if not callable(method):
-                return self.makeerror('method does not exist')
+                return self.makeerror('method "{}" does not exist'.format(method_name))
 
             try:
                 result = method(*params)
