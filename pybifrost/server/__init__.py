@@ -59,7 +59,7 @@ class Server:
         if 'method' in request:
             if 'params' in request:
                 try:
-                    params = map(self.deref, request['params'])
+                    params = [self.deref(param) for param in request['params']]
                 except TypeError:
                     return self.makeerror('params should be a list')
             else:
@@ -100,13 +100,16 @@ class Server:
         elif isinstance(obj, list):
             return list(map(self.getref, obj))
         elif isinstance(obj, dict):
-            return {self.getref(key): self.getref(val)
-                    for key, val in obj.items()}
+            if all(isinstance(key, str) for key in obj.keys()):
+                return {self.getref(key): self.getref(val)
+                        for key, val in obj.items()}
+            return {'__bf_dict__': [[self.getref(key), self.getref(val)]
+                                 for key, val in obj.items()]}
 
         oid = id(obj)
         if oid not in self.objs:
             self.objs[oid] = obj
-        return {'__oid__': oid}
+        return {'__bf_oid__': oid}
 
     def deref(self, obj):
         if isinstance(obj, (str, int, float, bool, type(None))):
@@ -114,9 +117,12 @@ class Server:
         elif isinstance(obj, list):
             return list(map(self.deref, obj))
         elif isinstance(obj, dict):
-            if '__oid__' in obj:
-                oid = obj['__oid__']
+            if '__bf_oid__' in obj:
+                oid = obj['__bf_oid__']
                 return self.objs[oid]
+            elif '__bf_dict__' in obj:
+                return {self.deref(key): self.deref(val)
+                        for key, val in obj['__bf_dict__']}
             return {self.deref(key): self.deref(val)
                     for key, val in obj.items()}
         raise RuntimeError('cannot deref unexpected object: {}'.format(obj))
