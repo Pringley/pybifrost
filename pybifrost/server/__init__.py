@@ -25,9 +25,11 @@ class Server:
         line = self.infile.readline()
         if not line:
             raise StopServer # stop at EOF
+        logfr(line, end='')
         return line
 
     def send(self, response):
+        logfr(response)
         self.outfile.write(response + '\n')
         self.outfile.flush()
 
@@ -121,3 +123,7 @@ class Server:
 
     def next_id(self):
         return next(self._idgen)
+
+def logfr(*args, **kwargs):
+    with open('/tmp/logfr', 'a') as tmplog:
+        print(*args, file=tmplog, **kwargs)
